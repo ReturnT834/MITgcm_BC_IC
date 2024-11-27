@@ -4,13 +4,13 @@
 # Step 0. Get Mask info
 # Step 1. Space Interpolation
 
-RUNDATE=CHECK
+RUNDATE=ECMWF-ERAINT
 #DATESTART=$( date -d "${RUNDATE}  -  7  days " +%Y%m%d-%H:%M:%S )
 #DATE__END=$( date -d "${RUNDATE}  + 36 hours " +%Y%m%d-%H:%M:%S )
 #DOWNSTART=$( date -d "${RUNDATE}  -  8  days " +%Y%m%d-%H:%M:%S )
 DATESTART=20000101-00:30:00
-DATE__END=20000101-23:30:00
-#DATE__END=20101231-23:30:00
+#DATE__END=20000101-23:30:00
+DATE__END=20101231-23:30:00
 . ./profile.inc
 
 RUNDIR=/g100_scratch/userexternal/plazzari/RETURN_P-o-C/${RUNDATE}
@@ -20,7 +20,7 @@ RUNDIR=/g100_scratch/userexternal/plazzari/RETURN_P-o-C/${RUNDATE}
           BATHYGZ=bathy.gz
             BATHY=$RUNDIR/bathy.nc
 DOWNLOADED_METEO=$RUNDIR/DOWNLOAD
-      ORIG_METEO=/gss/gss_work/DRES_OGS_BiGe/plazzari/ICT23_ESP/ECMWF-ERAINT/evaluation/r1i1p1/ICTP-RegCM4-7/fpsconv-x2yn2-v1/1hr/
+      ORIG_METEO=/g100_scratch/userexternal/plazzari/REGCM/ECMWF-ERAINT/
         BC_METEO=$RUNDIR/BC/
    FTP_BATCHFILE=$RUNDIR/batchfile
 DOWNTIMELISTFILE=$RUNDIR/to_download_timelist.txt
@@ -42,10 +42,9 @@ medmit_prex_or_die "python static-data/masks/CADEAU/maskgen.py -b $BATHY -o $MAS
 ### Step 1. Space Interpolation   ###############################
 
 medmit_prex_or_die " python TimeList_generator.py -s $DATESTART -e $DATE__END --hours 1 > $TIMELISTFILE "
-medmit_prex_or_die " python meteo_generator_RegCM.py -i $ORIG_METEO -o $BC_METEO -m $MASK_128 --nativemask $MASK_RCM_V0 -t $TIMELISTFILE "
+medmit_prex_or_die " mpirun -np 7 python meteo_generator_RegCM_LOW_RAM.py -i $ORIG_METEO -o $BC_METEO -m $MASK_128 --nativemask $MASK_RCM_V0 -t $TIMELISTFILE "
 
 ##################################################################
-
 
 medmit_prex_or_die " mv $BC_METEO/CHECK $RUNDIR "
 
